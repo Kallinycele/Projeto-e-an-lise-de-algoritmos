@@ -1,0 +1,31 @@
+def floyd_warshall(graph):
+    n = len(graph)
+    dp = [[float('inf') for _ in range(n)] for _ in range(n)]
+
+    for i in range(n):
+        dp[i][i] = 0
+
+    for i in range(n):
+        for j in range(n):
+            if j in graph[i]:
+                dp[i][j] = graph[i][j]
+
+    for k in range(n):
+        for i in range(n):
+            for j in range(n):
+                dp[i][j] = min(dp[i][j], dp[i][k] + dp[k][j])
+
+    return dp
+
+# Exemplo de uso
+graph = {
+    0: {1: 2, 2: 4},
+    1: {2: 5},
+    2: {3: 7},
+    3: {0: 3}
+}
+
+result = floyd_warshall(graph)
+print("Menor caminho entre os vertices:")
+for row in result:
+    print(row)
