@@ -1,0 +1,145 @@
+frequencias = []
+percentuais= []
+codeVector = []
+lettersVector = []
+texto = "iffffmmaaa"
+
+class No:
+
+  def __init__(self, chave=None, frequencia=None, esquerda=None, direita=None):
+    self.chave = chave
+    self.frequencia = frequencia
+    self.esquerda = esquerda
+    self.direita = direita
+
+  def __repr__(self):
+    return '%s <- %s -> %s' % (self.esquerda and self.esquerda.chave, self.chave, self.direita and self.direita.chave)
+
+
+def letra_para_binario(letra):
+    valor_ascii = ord(letra)
+    valor_binario = bin(valor_ascii)[2:]
+    # valor_binario = valor_binario.zfill(4)  
+    return valor_binario
+
+def string_para_binario(texto):
+    resultado = ""
+    for letra in texto:
+        resultado += letra_para_binario(letra) + " "
+    resultado = resultado.rstrip()
+    return resultado
+
+def frequencia(texto):
+    for letra in set(texto):
+        frequencia = texto.count(letra)
+        frequencias.append((letra, frequencia))
+    frequencias_ordenadas = sorted(frequencias, key=lambda x: x[1], reverse=True)
+    return frequencias_ordenadas
+
+def percentual_frequencia():
+    for letra, frequencia in frequencias:
+        porcentagem = (frequencia/ len(texto))*100
+        percentuais.append((letra, porcentagem))
+    percentuais_ordenados = sorted(percentuais, key=lambda x: x[1], reverse=True)
+    return percentuais_ordenados
+
+def agrupar_percentual(percentuais):
+    while len(percentuais) > 1:
+        percentuais_ordenados = sorted(percentuais, key=lambda x: x[1])
+        menor_porcentagem_1 = percentuais_ordenados[0][1]
+        menor_porcentagem_2 = percentuais_ordenados[1][1]
+        soma_menores = menor_porcentagem_1 + menor_porcentagem_2
+        percentuais = [(letra, porcentagem) 
+        for letra, porcentagem in percentuais 
+            if porcentagem not in [menor_porcentagem_1, menor_porcentagem_2]]
+        percentuais.append(('N', soma_menores))
+        print( percentuais)
+    return percentuais
+
+def chave_ordenacao(dicionario):
+    return (dicionario['quantidade'], -len(dicionario['letra']),)
+
+def ordena(dicionario):
+    return len(dicionario["codigo"])
+
+def count_appearances(word):
+    letter_counts = {}
+    for letter in word:
+        letter_counts[letter] = letter_counts.get(letter, 0) + 1
+    return [{"letra": letra, "quantidade": quantidade} for letra, quantidade in letter_counts.items()]
+
+def huffmanTree(vector):
+    treeVector = []
+    vectorAux = []
+    while len(vector) > 0:
+        while len(vectorAux) < 2 and len(vector) > 0:
+            vectorAux.append(vector[0])
+            vector.pop(0)
+        treeVector.append(createNode(vectorAux))
+        vector.append({
+            "letra": treeVector[len(treeVector) - 1].chave,
+            "quantidade": treeVector[len(treeVector) - 1].aparicoes
+        })
+        vector = sorted(vector, key=chave_ordenacao)
+        if len(vector) == 1:
+            tree = No()
+            tree = adjustTree(tree, treeVector)
+            return tree
+        vectorAux = []
+
+def createNode(vector):
+    if len(vector) == 1:
+        aux = No(vector[0]["letra"], vector[0]["quantidade"])
+        aux.direita = No(vector[0]["letra"])
+        return aux
+    aux = No(vector[1]["letra"] + vector[0]["letra"], vector[0]["quantidade"] + vector[1]["quantidade"])
+    aux.direita = No(vector[0]["letra"])
+    aux.esquerda = No(vector[1]["letra"])
+    return aux
+
+def adjustTree(tree, vector):
+    if tree is None and len(vector) > 0:
+        tree = No()
+    
+    if tree is not None and tree.chave is None and len(vector) > 0:
+        tree.chave = vector[-1].chave
+        tree.aparicoes = vector[-1].aparicoes
+        vector.pop()
+
+    if tree is not None and tree.direita is not None:
+        adjustTree(tree.direita, vector)
+    elif tree is not None and len(vector) > 0:
+        tree.direita = vector[-1]
+        vector.pop()
+    
+    if tree is not None and tree.esquerda is not None:
+        adjustTree(tree.esquerda, vector)
+    elif tree is not None and len(vector) > 0:
+        tree.esquerda = vector[-1]
+        vector.pop()
+
+    return tree
+
+
+def code(tree, value=" "):
+    if tree.direita is None:
+        codeVector.append({"letra": tree.chave, "codigo": value})
+        value = value[:-1]
+        return
+    code(tree.direita, value + "1")
+    code(tree.esquerda, value + "0")
+
+code(huffmanTree(lettersVector))
+
+
+codeVector = sorted(codeVector, key=ordena)
+
+binario = string_para_binario(texto)
+frequencia1 = frequencia(texto)
+percentuais = percentual_frequencia()
+
+print("Texto em binario:", binario)
+print("Frequencia:", frequencia1)
+print("Percentuais:", percentuais)
+print("Agrupamento dos percentuais:")
+menores_percentuais = agrupar_percentual(percentuais)
