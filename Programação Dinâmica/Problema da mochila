@@ -1,0 +1,33 @@
+def mochila_booleana(capacidade, pesos, valor):
+    n = len(pesos)
+    dp = [[0 for _ in range(capacidade + 1)] for _ in range(n + 1)]
+
+    for peso in range(1, n + 1):
+        for capac in range(capacidade + 1):
+            if pesos[peso - 1] <= capac:
+                #dp[peso][capac] = max(valor_do_item + dp[anterior][capacidade_restante_apos_adicionar_item], dp[anterior][capacidade_sem_adicionar_item])
+                dp[peso][capac] = max(valor[peso - 1] + dp[peso - 1][capac - pesos[peso - 1]], dp[peso - 1][capac])
+            else:
+                dp[peso][capac] = dp[i - 1][capac]
+
+    included_items = []
+    capac = capacidade
+    for i in range(n, 0, -1):
+        if dp[i][capac] != dp[i - 1][capac]:
+            included_items.append(i - 1)
+            capac -= pesos[i - 1]
+
+    included_items.reverse()
+    return dp[n][capacidade], included_items
+
+# Exemplo de uso
+capacidade = 10
+pesos = [2, 3, 4, 5]
+valor = [3, 4, 5, 6]
+max_value, included_items = mochila_booleana(capacidade, pesos, valor)
+
+print("Capacidade da mochila:", capacidade)
+print("Valor maximo na mochila:", max_value)
+print("Itens incluidos na mochila:")
+for item in included_items:
+    print(f"Item {item + 1} - Peso: {pesos[item]}, Valor: {valor[item]}")
